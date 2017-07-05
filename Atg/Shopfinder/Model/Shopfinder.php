@@ -33,13 +33,25 @@ class Shopfinder implements ShopfinderInterface
      * @return array List of stores.
      */
     public function stores() {
-        //$stores = array(1,2,3,4);
-        
-$Mage = \Magento\Framework\App\ObjectManager::getInstance();
-        $stores = $Mage->getStores();
-        
+        /** @var \Magento\Framework\App\ObjectManager $obj */
+        $obj = \Magento\Framework\App\ObjectManager::getInstance();
 
+        /** @var \Magento\Store\Model\StoreManagerInterface|\Magento\Store\Model\StoreManager $storeManager */
+        $storeManager = $obj->get('Magento\Store\Model\StoreManagerInterface');
+        $stores = $storeManager->getStores($withDefault = false);
 
-        return $stores;
+        //Get scope config
+        /** @var \Magento\Framework\App\Config\ScopeConfigInterface|\Magento\Framework\App\Config $scopeConfig */
+        $scopeConfig = $obj->get('Magento\Framework\App\Config\ScopeConfigInterface');
+
+        //Locale code
+        $locale = [];
+
+        //Try to get list of locale for all stores;
+        foreach($stores as $store) {
+            $locale[] = $scopeConfig->getValue('general/locale/code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $store->getStoreId());
+        }
+
+            return $locale;
     }
 }
