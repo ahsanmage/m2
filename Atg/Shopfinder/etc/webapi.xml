@@ -23,4 +23,11 @@
         </resources>
     </route>
 
+    <route method="GET" url="/V1/shopfinder">
+        <service class="Atg\Shopfinder\Api\ShopfinderRepositoryInterface" method="getList"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    
 </routes>

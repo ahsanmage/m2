@@ -35,4 +35,11 @@ interface ShopfinderInterface
      * @return array List of stores.
      */
     public function stores();
+
+    /**
+     * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
+     * @return \Webkul\Hello\Api\Data\TestSearchResultsInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function index(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria);
 }

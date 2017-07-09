@@ -23,7 +23,8 @@ class Shopfinder implements ShopfinderInterface
      * @return int The sum of the two values.
      */
     public function add($num1, $num2) {
-        return $num1 + $num2 + 5;
+        $stores = array(1,2,3,4);
+        return $stores;
     }
     
     /**
@@ -53,5 +54,57 @@ class Shopfinder implements ShopfinderInterface
         }
 
             return $locale;
+    }
+
+    /**
+     * Load Test data collection by given search criteria
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @param \Magento\Framework\Api\SearchCriteriaInterface $criteria
+     * @return \Webkul\Hello\Model\ResourceModel\Test\Collection
+     */
+    public function index(\Magento\Framework\Api\SearchCriteriaInterface $criteria)
+    {
+        $searchResults = $this->searchResultsFactory->create();
+        $searchResults->setSearchCriteria($criteria);
+ 
+        $collection = $this->testCollectionFactory->create();
+        foreach ($criteria->getFilterGroups() as $filterGroup) {
+            foreach ($filterGroup->getFilters() as $filter) {
+                $condition = $filter->getConditionType() ?: 'eq';
+                $collection->addFieldToFilter($filter->getField(), [$condition => $filter->getValue()]);
+            }
+        }
+        $searchResults->setTotalCount($collection->getSize());
+        $sortOrdersData = $criteria->getSortOrders();
+        if ($sortOrdersData) {
+            foreach ($sortOrdersData as $sortOrder) {
+                $collection->addOrder(
+                    $sortOrder->getField(),
+                    ($sortOrder->getDirection() == SortOrder::SORT_ASC) ? 'ASC' : 'DESC'
+                );
+            }
+        }
+        $collection->setCurPage($criteria->getCurrentPage());
+ 
+        $collection->setPageSize($criteria->getPageSize());
+         
+        $testItem = [];
+        /** @var Test $testModel */
+        foreach ($collection as $testModel) {
+            $testData = $this->dataTestFactory->create();
+            $this->dataObjectHelper->populateWithArray(
+                $testData,
+                $testModel->getData(),
+                'Webkul\Hello\Api\Data\TestInterface'
+            );
+            $preorderItem[] = $this->dataObjectProcessor->buildOutputDataArray(
+                $testData,
+                'Webkul\Hello\Api\Data\TestInterface'
+            );
+        }
+        $searchResults->setItems($testItem);
+        return $searchResults;
     }
 }
